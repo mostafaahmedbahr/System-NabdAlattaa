@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/data/models/user_profile.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../auth/presentation/cubits/auth_state.dart';
+import '../../../admin/presentation/screens/admin_home_screen.dart';
+import '../../../../core/security/app_permissions.dart';
 import '../../../family_cases/presentation/screens/case_list_screen.dart';
 import '../../../programs/presentation/screens/programs_screen.dart';
 
@@ -41,6 +43,10 @@ class HomeScreen extends StatelessWidget {
     final user = context.select<AuthCubit, User?>((c) => c.state.user);
     final profile =
         context.select<AuthCubit, UserProfile?>((c) => c.state.profile);
+    final perms = context.select<AuthCubit, AppPermissions?>(
+          (c) => c.state.permissions,
+        ) ??
+        AppPermissions.empty;
     return BlocListener<AuthCubit, AuthState>(
       listenWhen: (p, c) =>
           c.status == AuthStatus.authenticated &&
@@ -143,6 +149,21 @@ class HomeScreen extends StatelessWidget {
                         );
                       },
                     ),
+                    if (perms.hasAnyModuleView)
+                      _buildSectionCard(
+                        context,
+                        icon: Icons.admin_panel_settings,
+                        title: 'نظام الإدارة',
+                        subtitle: 'الموظفون والصلاحيات والأقسام والإعدادات',
+                        color: Colors.indigo,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const AdminHomeScreen(),
+                            ),
+                          );
+                        },
+                      ),
                   ],
                 ),
               ],

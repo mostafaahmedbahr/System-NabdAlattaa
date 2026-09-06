@@ -1,0 +1,141 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ============================================================
+    //  أدوات مساعدة
+    // ============================================================
+
+    // الصلاحيات الفعلية للمستخدم (rollup) المحفوظة في حقل perm.
+    function perm() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid))
+        .data
+        .perm;
+    }
+
+    function hasPerm(module, action) {
+      return isSignedIn() && perm()['$(module).$(action)'] == true;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    function isAdmin() {
+      return hasPerm('employees', 'managePermissions') ||
+             hasPerm('settings', 'edit');
+    }
+
+    // ربط اسم القائمة المرجعية بالوحدة الخاصة بها.
+    function refModule(collection) {
+      return collection == 'aid_types' ? 'aids'
+        : collection == 'donation_types' ? 'donations'
+        : collection == 'expense_categories' ? 'expenses'
+        : collection == 'inventory_categories' ||
+          collection == 'stock_reasons' ||
+          collection == 'units' ? 'inventory'
+        : collection == 'family_statuses' ||
+          collection == 'priorities' ||
+          collection == 'rejection_reasons' ? 'families'
+        : 'unknown';
+    }
+
+    // ============================================================
+    //  الموظفون (users) — مصدر الصلاحيات
+    // ============================================================
+    match /users/{uid} {
+      allow read: if isSignedIn() &&
+        (request.auth.uid == uid ||
+         hasPerm('employees', 'view') ||
+         isAdmin());
+
+      // الإنشاء يتم من داخل التطبيق فقط وللمستخدم نفسه عند التسجيل.
+      allow create: if isSignedIn() && request.auth.uid == uid;
+
+      // التحديث الذاتي يقتصر على آخر دخول؛ أما باقي البيانات فمسؤول عنها الأدمن.
+      allow update: if isSignedIn() && (
+        request.auth.uid == uid &&
+        request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['lastLoginAt'])
+      ) || hasPerm('employees', 'edit') || isAdmin();
+
+      allow delete: if false;
+    }
+
+    // ============================================================
+    //  الأدوار والصلاحيات
+    // ============================================================
+    match /roles/{id} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin() || hasPerm('employees', 'managePermissions');
+      allow delete: if false;
+    }
+
+    // ============================================================
+    //  الأقسام
+    // ============================================================
+    match /departments/{id} {
+      allow read: if isSignedIn();
+      allow create, update: if hasPerm('departments', 'edit') || isAdmin();
+      allow delete: if false;
+    }
+
+    // ============================================================
+    //  القوائم المرجعية
+    // ============================================================
+    match /{collection}/{id} {
+      allow read: if isSignedIn() &&
+        refModule(collection) in ['aids', 'donations', 'expenses', 'inventory', 'families'];
+      allow create, update: if isSignedIn() &&
+        hasPerm(refModule(collection), 'edit');
+      allow delete: if false;
+    }
+
+    // ============================================================
+    //  طلبات الموافقة (Approval Workflow)
+    // ============================================================
+    match /approval_requests/{id} {
+      allow read: if isSignedIn() && hasPerm('approvals', 'view');
+      allow create: if isSignedIn() && resource == null;
+      // الاعتماد أو الرفض للمخوّلين فقط.
+      allow update: if hasPerm('approvals', 'approve') && isAdmin();
+      allow delete: if false;
+    }
+
+    // ============================================================
+    //  سجل العمليات — كتابة مباشرة ممنوعة (تتم عبر Cloud Function)
+    // ============================================================
+    match /audit_logs/{id} {
+      allow read: if hasPerm('audit', 'view') || isAdmin();
+      allow write: if false;
+    }
+
+    // ============================================================
+    //  الإشعارات
+    // ============================================================
+    match /notifications/{id} {
+      allow read: if isSignedIn();
+      allow create: if hasPerm('notifications', 'send') && resource == null;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ============================================================
+    //  الإعدادات
+    // ============================================================
+    match /settings/{id} {
+      allow read: if isSignedIn();
+      allow create, update: if hasPerm('settings', 'edit') || isAdmin();
+      allow delete: if false;
+    }
+
+    // ============================================================
+    //  بيانات التشغيل (الأسر، التبرعات، المصروفات، المخزون ...)
+    //  تُقرأ وتُكتب للمسجلين، لكن لا حذف نهائي أبدًا.
+    // ============================================================
+    match /{document=**} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if false;
+    }
+  }
+}

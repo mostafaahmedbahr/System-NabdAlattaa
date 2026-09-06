@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'core/di/injection.dart';
 import 'core/theme/app_theme.dart';
+import 'features/admin/data/repositories/bootstrap_repository.dart';
 import 'features/auth/presentation/cubits/auth_cubit.dart';
 import 'features/auth/presentation/screens/auth_gate.dart';
 import 'features/family_cases/presentation/cubits/family_case_cubit.dart';
@@ -14,6 +16,13 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  setupDependencies();
+  try {
+    await BootstrapRepository.instance.ensureDefaults();
+  } catch (_) {
+    // لا نُوقف تشغيل التطبيق لو تعذّر إنشاء البيانات الافتراضية
+    // (مثلاً: غياب الاتصال أو قواعد Firestore).
+  }
   runApp(const MyApp());
 }
 

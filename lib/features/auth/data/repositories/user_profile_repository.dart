@@ -23,4 +23,31 @@ class UserProfileRepository {
       return UserProfile.fromMap(data, uid: uid);
     });
   }
+
+  Future<void> updateProfileFields(
+    String uid,
+    Map<String, dynamic> fields,
+  ) async {
+    await _users.doc(uid).update({
+      ...fields,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// يسجّل آخر دخول للمستخدم فور نجاح تسجيل الدخول.
+  Future<void> recordLogin(String uid) async {
+    try {
+      await _users.doc(uid).update({
+        'lastLoginAt': FieldValue.serverTimestamp(),
+      });
+    } catch (_) {
+      // المستند قد لا يكون أُنشئ بعد لحظة التسجيل — نتجاهل.
+    }
+  }
+
+  /// هل يوجد أي مستخدم في النظام (لتحديد دور أول حساب).
+  Future<bool> isFirstUser() async {
+    final snapshot = await _users.limit(1).get();
+    return snapshot.docs.isEmpty;
+  }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "529547011863",
+    "project_id": "system-nabdalattaa",
+    "storage_bucket": "system-nabdalattaa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:529547011863:android:79da1a21e4062a52dd7952",
+        "android_client_info": {
+          "package_name": "com.zerobugs.system_nabd_alattaa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJS5uP4ZZqrav0HGUyjDr1b90cAXQoGWs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

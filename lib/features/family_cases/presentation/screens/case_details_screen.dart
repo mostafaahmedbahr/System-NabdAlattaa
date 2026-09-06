@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:printing/printing.dart';
 
+import '../../pdf/case_pdf.dart';
 import '../cubits/family_case_cubit.dart';
 import '../cubits/family_case_state.dart';
 import '../../data/models/family_case.dart';
@@ -138,6 +140,53 @@ class _CaseDetailsView extends StatelessWidget {
     }
   }
 
+  Future<void> _exportCase(BuildContext context) async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.file_download_outlined),
+              title: const Text('تحميل PDF'),
+              subtitle: const Text('حفظ ملف الحالة كـ PDF على جهازك'),
+              onTap: () => Navigator.pop(ctx, 'download'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.print_outlined),
+              title: const Text('طباعة'),
+              subtitle: const Text('فتح نافذة طباعة المتصفح'),
+              onTap: () => Navigator.pop(ctx, 'print'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null) return;
+
+    try {
+      final bytes = await CasePdfExporter.export(caseItem);
+      if (!context.mounted) return;
+      if (choice == 'download') {
+        await Printing.sharePdf(
+          bytes: bytes,
+          filename: 'case-${caseItem.familyHeadName}.pdf',
+        );
+      } else {
+        await Printing.layoutPdf(name: 'case.pdf', onLayout: (_) async => bytes);
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('حدث خطأ أثناء التصدير: $e'),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -166,6 +215,11 @@ class _CaseDetailsView extends StatelessWidget {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'تصدير / طباعة',
+            icon: const Icon(Icons.ios_share_rounded),
+            onPressed: () => _exportCase(context),
+          ),
           IconButton(
             tooltip: 'تعديل',
             icon: const Icon(Icons.edit_outlined),

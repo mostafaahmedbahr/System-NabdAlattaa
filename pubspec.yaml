@@ -42,6 +42,8 @@ dependencies:
   intl: ^0.20.3
   flutter_localizations:
     sdk: flutter
+  printing: ^5.15.0
+  pdf: ^3.13.0
 
 dev_dependencies:
   flutter_test:
@@ -95,5 +97,6 @@ flutter:
   #
   assets:
     - assets/images/
+    - assets/fonts/
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

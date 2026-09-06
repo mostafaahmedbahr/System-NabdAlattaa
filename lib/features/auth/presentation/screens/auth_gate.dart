@@ -19,6 +19,7 @@ class AuthGate extends StatelessWidget {
               body: Center(child: CircularProgressIndicator()),
             );
           case AuthStatus.authenticated:
+          case AuthStatus.signingOut:
             return const HomeScreen();
           case AuthStatus.unauthenticated:
           case AuthStatus.authenticating:

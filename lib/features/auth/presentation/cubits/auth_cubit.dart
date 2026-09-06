@@ -22,17 +22,23 @@ class AuthCubit extends Cubit<AuthState> {
   final UserProfileRepository _profileRepository;
   StreamSubscription<User?>? _authSubscription;
   StreamSubscription<UserProfile?>? _profileSubscription;
+  User? _lastUser;
+  UserProfile? _lastProfile;
 
   void _subscribe() {
     _authSubscription = _repository.watchUser().listen((user) {
       _profileSubscription?.cancel();
       if (user == null) {
+        _lastUser = null;
+        _lastProfile = null;
         emit(const AuthState(status: AuthStatus.unauthenticated));
         return;
       }
+      _lastUser = user;
       emit(AuthState(user: user, status: AuthStatus.authenticated));
       _profileSubscription = _profileRepository.watchProfile(user.uid).listen(
         (profile) {
+          _lastProfile = profile;
           emit(AuthState(
             user: user,
             profile: profile,
@@ -87,7 +93,23 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> signOut() => _repository.signOut();
+  Future<void> signOut() async {
+    emit(AuthState(
+      user: _lastUser,
+      profile: _lastProfile,
+      status: AuthStatus.signingOut,
+    ));
+    try {
+      await _repository.signOut();
+    } catch (e) {
+      emit(AuthState(
+        user: _lastUser,
+        profile: _lastProfile,
+        status: AuthStatus.authenticated,
+        errorMessage: _repository.getErrorMessage(e),
+      ));
+    }
+  }
 
   @override
   Future<void> close() {

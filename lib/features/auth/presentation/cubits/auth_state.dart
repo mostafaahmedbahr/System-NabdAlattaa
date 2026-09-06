@@ -27,5 +27,6 @@ enum AuthStatus {
   authenticating,
   authenticated,
   unauthenticated,
+  signingOut,
   error,
 }

@@ -38,6 +38,7 @@ class AppDropdownField extends StatelessWidget {
     required this.onChanged,
     this.hint = '',
     this.isRequired = true,
+    this.decoration,
   });
 
   final String label;
@@ -46,16 +47,18 @@ class AppDropdownField extends StatelessWidget {
   final ValueChanged<String?> onChanged;
   final String hint;
   final bool isRequired;
+  final InputDecoration? decoration;
 
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       initialValue: value,
       isExpanded: true,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
+      decoration: decoration ??
+          InputDecoration(
+            labelText: label,
+            border: const OutlineInputBorder(),
+          ),
       items:
           items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
       hint: Text(hint),

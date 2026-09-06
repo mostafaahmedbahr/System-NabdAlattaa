@@ -54,7 +54,8 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
           ? '${existing!.pensionValue}'
           : '',
     );
-    _description = TextEditingController(text: existing?.initialDescription ?? '');
+    _description =
+        TextEditingController(text: existing?.initialDescription ?? '');
     _governorate = existing?.governorate;
     _socialStatus = existing?.socialStatus;
     _helpType = existing?.helpType;
@@ -179,7 +180,9 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isNew ? 'تم حفظ الحالة، والحالة الحالية: تحت المراجعة' : 'تم تحديث الحالة بنجاح',
+              isNew
+                  ? 'تم حفظ الحالة، والحالة الحالية: تحت المراجعة'
+                  : 'تم تحديث الحالة بنجاح',
             ),
             backgroundColor: ok ? null : Colors.red.shade700,
           ),
@@ -210,9 +213,31 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'تعديل الحالة' : 'حالة جديدة'),
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ClipOval(
+              child: Image(
+                image: AssetImage('assets/images/logo.jpg'),
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              _isEditing ? 'تعديل الحالة' : 'حالة جديدة',
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
       ),
       body: Form(
         key: _formKey,
@@ -224,26 +249,27 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
             _card([
               TextFormField(
                 controller: _headName,
-                decoration: const InputDecoration(
-                  labelText: 'اسم رب الأسرة / الحالة *',
-                  prefixIcon: Icon(Icons.person_outline),
-                  border: OutlineInputBorder(),
+                decoration: appFieldDecoration(
+                  context,
+                  label: 'اسم رب الأسرة / الحالة *',
+                  icon: Icons.person_outline,
                 ),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
               ),
               const SizedBox(height: 16),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: TextFormField(
                       controller: _phone1,
                       textDirection: TextDirection.ltr,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'رقم الهاتف الأول *',
-                        prefixIcon: Icon(Icons.phone),
-                        border: OutlineInputBorder(),
+                      decoration: appFieldDecoration(
+                        context,
+                        label: 'رقم الهاتف الأول *',
+                        icon: Icons.phone_outlined,
                       ),
                       validator: (v) =>
                           (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
@@ -255,10 +281,10 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
                       controller: _phone2,
                       textDirection: TextDirection.ltr,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'رقم الهاتف الثاني',
-                        prefixIcon: Icon(Icons.phone_android),
-                        border: OutlineInputBorder(),
+                      decoration: appFieldDecoration(
+                        context,
+                        label: 'رقم الهاتف الثاني',
+                        icon: Icons.phone_android_outlined,
                       ),
                     ),
                   ),
@@ -267,10 +293,10 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _address,
-                decoration: const InputDecoration(
-                  labelText: 'العنوان بالتفصيل *',
-                  prefixIcon: Icon(Icons.location_on_outlined),
-                  border: OutlineInputBorder(),
+                decoration: appFieldDecoration(
+                  context,
+                  label: 'العنوان بالتفصيل *',
+                  icon: Icons.location_on_outlined,
                 ),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
@@ -281,6 +307,11 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
                 items: kGovernorates,
                 value: _governorate,
                 onChanged: (v) => setState(() => _governorate = v),
+                decoration: appFieldDecoration(
+                  context,
+                  label: 'المحافظة',
+                  icon: Icons.map_outlined,
+                ),
               ),
               const SizedBox(height: 16),
               AppDropdownField(
@@ -288,6 +319,11 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
                 items: kSocialStatuses,
                 value: _socialStatus,
                 onChanged: (v) => setState(() => _socialStatus = v),
+                decoration: appFieldDecoration(
+                  context,
+                  label: 'الحالة الاجتماعية',
+                  icon: Icons.people_outline,
+                ),
               ),
               const SizedBox(height: 16),
               AppDropdownField(
@@ -295,6 +331,11 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
                 items: kHelpTypes,
                 value: _helpType,
                 onChanged: (v) => setState(() => _helpType = v),
+                decoration: appFieldDecoration(
+                  context,
+                  label: 'نوع المساعدة المطلوبة',
+                  icon: Icons.volunteer_activism_outlined,
+                ),
               ),
               const SizedBox(height: 16),
               AppDropdownField(
@@ -302,9 +343,14 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
                 items: kClassificationTypes,
                 value: _classification,
                 onChanged: (v) => setState(() => _classification = v),
+                decoration: appFieldDecoration(
+                  context,
+                  label: 'تصنيف الحالة',
+                  icon: Icons.category_outlined,
+                ),
               ),
             ]),
-            const SizedBox(height: 20),
+            const SizedBox(height: 22),
             _sectionHeader('الوضع الوظيفي والمالي', Icons.work_outline),
             const SizedBox(height: 12),
             _card([
@@ -320,33 +366,34 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'قيمة المعاش أو التأمينات (إن وجدت)',
-                  prefixIcon: Icon(Icons.savings_outlined),
-                  border: OutlineInputBorder(),
+                decoration: appFieldDecoration(
+                  context,
+                  label: 'قيمة المعاش أو التأمينات (إن وجدت)',
+                  icon: Icons.savings_outlined,
                 ),
               ),
             ]),
-            const SizedBox(height: 20),
+            const SizedBox(height: 22),
             _sectionHeader('تاريخ تسجيل الحالة', Icons.event_outlined),
             const SizedBox(height: 12),
             _card([
               InkWell(
                 onTap: _pickDate,
+                borderRadius: BorderRadius.circular(14),
                 child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'تاريخ تسجيل الحالة',
-                    prefixIcon: Icon(Icons.calendar_month),
-                    border: OutlineInputBorder(),
+                  decoration: appFieldDecoration(
+                    context,
+                    label: 'تاريخ تسجيل الحالة',
+                    icon: Icons.calendar_month,
                   ),
                   child:
                       Text(DateFormat('yyyy/MM/dd').format(_registrationDate)),
                 ),
               ),
             ]),
-            const SizedBox(height: 20),
+            const SizedBox(height: 22),
             _sectionHeader('الأسئلة الأولية عن الحالة', Icons.quiz_outlined),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               'اختر "نعم" في الأسئلة ثم أدخل التفاصيل المرتبطة بها.',
               style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
@@ -356,37 +403,28 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
               _questionCard(q),
               const SizedBox(height: 12),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: 22),
             _sectionHeader('وصف الحالة', Icons.description_outlined),
             const SizedBox(height: 12),
             _card([
               TextFormField(
                 controller: _description,
                 maxLines: 5,
-                decoration: const InputDecoration(
-                  labelText: 'الوصف المبدئي للحالة',
+                decoration: appFieldDecoration(
+                  context,
+                  label: 'الوصف المبدئي للحالة',
+                  icon: Icons.description_outlined,
+                ).copyWith(
                   hintText: 'أي معلومات أو ملاحظات إضافية عن الحالة...',
-                  border: OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
               ),
             ]),
             const SizedBox(height: 28),
-            FilledButton.icon(
-              onPressed: _saving ? null : _save,
-              icon: _saving
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.save_outlined),
-              label: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  _isEditing ? 'حفظ التعديلات' : 'حفظ الحالة (تحت المراجعة)',
-                ),
-              ),
+            AppPrimaryButton(
+              loading: _saving,
+              onPressed: _save,
+              label: _isEditing ? 'حفظ التعديلات' : 'حفظ الحالة (تحت المراجعة)',
             ),
           ],
         ),
@@ -395,27 +433,40 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
   }
 
   Widget _sectionHeader(String title, IconData icon) {
+    final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, color: Theme.of(context).colorScheme.primary, size: 22),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: scheme.primary.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.center,
+          child: Icon(icon, size: 20, color: scheme.primary),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
         ),
       ],
     );
   }
 
   Widget _card(List<Widget> children) {
+    final scheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.4)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -454,13 +505,12 @@ class _CaseFormScreenState extends State<CaseFormScreen> {
               keyboardType: f.isNumeric
                   ? const TextInputType.numberWithOptions(decimal: true)
                   : TextInputType.text,
-              decoration: InputDecoration(
-                labelText: f.label,
-                hintText: f.hint,
-                border: const OutlineInputBorder(),
-                prefixIcon: f.isNumeric
-                    ? const Icon(Icons.attach_money)
-                    : null,
+              decoration: appFieldDecoration(
+                context,
+                label: f.label,
+                icon: f.isNumeric ? Icons.attach_money : Icons.edit_note,
+              ).copyWith(
+                hintText: f.hint.isEmpty ? null : f.hint,
               ),
             ),
           ),

@@ -1,5 +1,65 @@
 import 'package:flutter/material.dart';
 
+InputDecoration appFieldDecoration(
+  BuildContext context, {
+  required String label,
+  required IconData icon,
+  Widget? suffix,
+}) {
+  final scheme = Theme.of(context).colorScheme;
+  return InputDecoration(
+    labelText: label,
+    prefixIcon: Icon(icon),
+    suffixIcon: suffix,
+    filled: true,
+    fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.4)),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: scheme.primary, width: 1.6),
+    ),
+  );
+}
+
+class AppPrimaryButton extends StatelessWidget {
+  const AppPrimaryButton({
+    super.key,
+    required this.onPressed,
+    required this.label,
+    this.loading = false,
+  });
+
+  final VoidCallback? onPressed;
+  final String label;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton(
+      onPressed: loading ? null : onPressed,
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.fromHeight(52),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      ),
+      child: loading
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2.2),
+            )
+          : Text(label),
+    );
+  }
+}
+
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,

@@ -115,57 +115,6 @@ class _AuthCard extends StatelessWidget {
   }
 }
 
-InputDecoration _authDecoration(
-  BuildContext context, {
-  required String label,
-  required IconData icon,
-  Widget? suffix,
-}) {
-  final scheme = Theme.of(context).colorScheme;
-  return InputDecoration(
-    labelText: label,
-    prefixIcon: Icon(icon),
-    suffixIcon: suffix,
-    filled: true,
-    fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide.none,
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.4)),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: scheme.primary, width: 1.6),
-    ),
-  );
-}
-
-Widget _authPrimaryButton({
-  required BuildContext context,
-  required bool loading,
-  required VoidCallback onPressed,
-  required String label,
-}) {
-  return FilledButton(
-    onPressed: loading ? null : onPressed,
-    style: FilledButton.styleFrom(
-      minimumSize: const Size.fromHeight(52),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-    ),
-    child: loading
-        ? const SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(strokeWidth: 2.2),
-          )
-        : Text(label),
-  );
-}
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.onSuccess});
 
@@ -227,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               textDirection: TextDirection.ltr,
-                              decoration: _authDecoration(
+                              decoration: appFieldDecoration(
                                 context,
                                 label: 'البريد الإلكتروني',
                                 icon: Icons.email_outlined,
@@ -241,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             TextFormField(
                               controller: _passwordController,
                               obscureText: _obscure,
-                              decoration: _authDecoration(
+                              decoration: appFieldDecoration(
                                 context,
                                 label: 'كلمة المرور',
                                 icon: Icons.lock_outline,
@@ -258,8 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   : null,
                             ),
                             const SizedBox(height: 26),
-                            _authPrimaryButton(
-                              context: context,
+                            AppPrimaryButton(
                               loading: loading,
                               label: 'دخول',
                               onPressed: () {
@@ -367,7 +315,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             TextFormField(
                               controller: _nameController,
                               textInputAction: TextInputAction.next,
-                              decoration: _authDecoration(
+                              decoration: appFieldDecoration(
                                 context,
                                 label: 'اسم الموظف',
                                 icon: Icons.person_outline,
@@ -383,7 +331,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               keyboardType: TextInputType.phone,
                               textDirection: TextDirection.ltr,
                               textInputAction: TextInputAction.next,
-                              decoration: _authDecoration(
+                              decoration: appFieldDecoration(
                                 context,
                                 label: 'رقم التلفون',
                                 icon: Icons.phone_outlined,
@@ -406,7 +354,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               hint: 'اختر القسم',
                               onChanged: (v) =>
                                   setState(() => _department = v),
-                              decoration: _authDecoration(
+                              decoration: appFieldDecoration(
                                 context,
                                 label: 'القسم',
                                 icon: Icons.work_outline,
@@ -418,7 +366,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               keyboardType: TextInputType.emailAddress,
                               textDirection: TextDirection.ltr,
                               textInputAction: TextInputAction.next,
-                              decoration: _authDecoration(
+                              decoration: appFieldDecoration(
                                 context,
                                 label: 'البريد الإلكتروني',
                                 icon: Icons.email_outlined,
@@ -437,7 +385,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             TextFormField(
                               controller: _passwordController,
                               obscureText: _obscure,
-                              decoration: _authDecoration(
+                              decoration: appFieldDecoration(
                                 context,
                                 label: 'كلمة المرور',
                                 icon: Icons.lock_outline,
@@ -460,8 +408,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               },
                             ),
                             const SizedBox(height: 26),
-                            _authPrimaryButton(
-                              context: context,
+                            AppPrimaryButton(
                               loading: loading,
                               label: 'إنشاء الحساب',
                               onPressed: () {
